@@ -1,4 +1,5 @@
 const {Schema,model} = require('mongoose');
+const bycrypt  = require('bcrypt');
 const userSchema = new Schema({
     fullName: {
         type: String,
@@ -44,5 +45,17 @@ const userSchema = new Schema({
 },{
     timestamps: true
 })
+
+// storing password in the encrypt format
+userSchema.pre('save', async function() {
+    // if password is not changed
+    if(!this.isModified('password')){
+        return next();
+    }
+    // if password is changed
+    this.password = await  bycrypt.hash(this.password,10);
+} )
+
+
 const User  = model('User', userSchema);
 module.export  = User;
