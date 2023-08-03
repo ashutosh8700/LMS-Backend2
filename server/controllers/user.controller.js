@@ -1,6 +1,12 @@
 const { default: AppError } = require("../utils/appError");
 const User = require('../models/user.modal');
 
+const cookieOptions = {
+    secure: true,
+    maxAge: 7*24*60*60*1000, // 7 days
+    httpOnly: true // not able to do it on javascript
+}
+
 // making controller
 const register =  async(req,res) =>{
   const {fullName,email,password} = req.body;
@@ -59,13 +65,35 @@ const login =  async   (req,res) =>{
    }
 
    const token = await user.generateJWTToken();
+   user.password = undefined;
+
+   res.cookie('token',token, cookieOptions); // set the token and cookieOptions function is called
+
+   res.status(201).json({
+        success: true,
+        message: 'User registration successfully',
+        user
+   });
+
 
    
 }
 
 const logout = (req,res) =>{
+    // make the token null
+    res.cookie('token',null,{
+        secure: true,
+        maxAge: 0,
+        httpOnly: true
+    });
     
+    res.status(200).json({
+        success: true,
+        message: 'User log out successfully'
+    })    
 }
+
+
 
 const getProfile = (req,res) =>{
     

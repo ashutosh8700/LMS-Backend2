@@ -5,7 +5,8 @@ const express = require('express');
 const cors = require('cors');
 var cookieParser = require('cookie-parser');
 // const cookieParser = require('cookie-parse');
-
+const userRoutes = require('./routes/user.routes');
+const errorMiddleware = require('./middlewares/error.middleware');
 
 // creating instance
 const app = express();
@@ -26,11 +27,12 @@ app.use('/ping', (req,res) => {
 });
 
 // 3 route config
-
-
+app.use('/api/v1/user', userRoutes);
 
 app.all('*', (req,res) =>{
     res.status(404).send('OOPS 404 Page not found'); 
-} )
+})
+
+app.use(errorMiddleware);
 
 module.exports = app;

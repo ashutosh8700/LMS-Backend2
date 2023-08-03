@@ -1,5 +1,6 @@
 const {Schema,model} = require('mongoose');
 const bycrypt  = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const userSchema = new Schema({
     fullName: {
         type: String,
@@ -53,8 +54,27 @@ userSchema.pre('save', async function() {
         return next();
     }
     // if password is changed
-    this.password = await  bycrypt.hash(this.password,10);
-} )
+    this.password = await  bcrypt.hash(this.password,10);
+});
+
+// compare password method  
+userSchema.methods = {
+    comparePassword:  async function(plainTextPassword){
+        return await  bycrypt.compare(plainTextPassword,this.password);
+    },
+    generateJWTToken: function(){
+        return jwt.sign(
+            {
+                id:this._id, role:this.role, email:this.email, subscription: this.subscription, // _id is mongo document id 
+            },
+                process.env.JWT_SECRET,
+
+            {  
+                expiresIn: process.env.JWT_EXPIRY
+            }
+            )
+    }
+}
 
 
 const User  = model('User', userSchema);
